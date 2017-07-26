@@ -25,3 +25,12 @@ I had a recycler view with gridded layout manager full of custom views. The padd
 ### Automatic scrolling in Recycler View
 
 When I would navigate to a page, it would automatically up scroll off the first half inch to inch on some pages. I used `git bisect` to narrow it down to 5 commits where we had upgraded our support library. From there I tried my best to get a minimum test case where I could reproduce the error on a particular page. I deleted code piece by piece until I found a small chunk of code that I could comment out and reveal or hide the error. When there was 1 element in the recycler view, it would not autoscroll. When there was 2, it would. I pointed to this out to my coworker to discuss this odd behavoir. And we did a google search and found this https://stackoverflow.com/a/40492486 . Turns out it was a feature added in the support library upgrade. I then looked through the source code to verify it.
+
+### Crash when tapping on a menu item
+
+One activity is used as an entry way from another activites launch. The first activites action bar was visible for a split second as the second activity was launched. If you have quick fingers or a slow device you could tap on the first items menu. This would result in a crash. There was a lot of legacy code involved and likely some suspect architectural patterns. The crash indicated an Illegal State Exception when a progress dialog was trying to be shown. This was a case where Activity was null. The fix was relatively easy. Since it wasn't important to manage the state of this dialog, I could allow the state to be lost and supress the error by using an alternate configuration to launch the progress dialog. I found these 2 blog posts quite interesting for educating myself on this issue.
+
+[https://medium.com/inloop/demystifying-androids-commitallowingstateloss-cb9011a544cc]
+
+[https://medium.com/@bherbst/the-many-flavors-of-commit-186608a015b1]
+
