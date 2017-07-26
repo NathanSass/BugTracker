@@ -28,9 +28,9 @@ When I would navigate to a page, it would automatically up scroll off the first 
 
 ### Crash when tapping on a menu item
 
-One activity is used as an entry way from another activites launch. The first activites action bar was visible for a split second as the second activity was launched. If you have quick fingers or a slow device you could tap on the first items menu. This would result in a crash. There was a lot of legacy code involved and likely some suspect architectural patterns. The crash indicated an Illegal State Exception when a progress dialog was trying to be shown. This was a case where Activity was null. The fix was relatively easy. Since it wasn't important to manage the state of this dialog, I could allow the state to be lost and supress the error by using an alternate configuration to launch the progress dialog. I found these 2 blog posts quite interesting for educating myself on this issue.
+One activity is used as an entry way for another activites launch. The first activity's action bar was visible for a split second as the second activity was launched. If you have quick fingers or a slow device you could tap on the first item's menu. This would result in a crash. There was a lot of legacy code involved and likely some suspect architectural patterns. The crash indicated an Illegal State Exception when a progress dialog was trying to be shown. This was a case where Activity was null. The fix was relatively easy. Since it wasn't important to manage the state of this dialog, I could allow the state to be lost and supress the error by using an alternate configuration to launch the progress dialog. I found these 2 blog posts quite interesting for educating myself on this issue.
 
-[https://medium.com/inloop/demystifying-androids-commitallowingstateloss-cb9011a544cc]
+https://medium.com/inloop/demystifying-androids-commitallowingstateloss-cb9011a544cc
 
-[https://medium.com/@bherbst/the-many-flavors-of-commit-186608a015b1]
+https://medium.com/@bherbst/the-many-flavors-of-commit-186608a015b1
 
