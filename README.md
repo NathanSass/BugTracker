@@ -38,21 +38,31 @@ https://medium.com/@bherbst/the-many-flavors-of-commit-186608a015b1
 
 ```
 Fatal Exception: java.lang.RuntimeException: Unable to start activity ComponentInfo{com.app.reader0/com.app.ui.MainMenuActivity}: java.lang.IllegalStateException: Could not find active fragment with index -1
-       at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2224)
-       at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2273)
-       at android.app.ActivityThread.handleRelaunchActivity(ActivityThread.java:3764)
-       at android.app.ActivityThread.access$900(ActivityThread.java:138)
-       at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1242)
-       at android.os.Handler.dispatchMessage(Handler.java:102)
-       at android.os.Looper.loop(Looper.java:149)
-       at android.app.ActivityThread.main(ActivityThread.java:5045)
-       at java.lang.reflect.Method.invokeNative(Method.java)
-       at java.lang.reflect.Method.invoke(Method.java:515)
-       at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:794)
-       at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:610)
-       at dalvik.system.NativeStart.main(NativeStart.java)
+      
 Caused by java.lang.IllegalStateException: Could not find active fragment with index -1
        at android.support.v4.app.FragmentManagerImpl.restoreAllState(Scribd:3026)
        at android.support.v4.app.Fragment.restoreChildFragmentState(Scribd:1436)
 ```
+
+Suprisingly this error does not return hits in google.
+
+The reproduction steps were.
+
+1. Open the activity with the ViewPager.
+2. Navigate to a new activity so the first activity is on the backstack.
+3. Background the app
+4. Go to the device settings and change the device language.
+5. Go back to the app.
+7. Press the up button to navigate back the activity with the ViewPager
+8. Crash occurs instead of reaching this activity
+
+I went to the device's developer options and switched on the setting `Don't Keep Activities`. I went through the reproduction steps and the app did not crash. From there I had a strong guess it has something to do with the Fragments in the ViewPager having `setRetainInstance(true)` being set. I then played around with the methods I felt were causing a problem to test my theories and followed this up with research about `setRetainInstance`, and `FragmentStatePagerAdapter` vs. `FragmentPagerAdapter`
+
+Here are some of my findings:
+
+`setRetainInstance(true)` and `FragmentStatePagerAdapter` each modify the behavior of the fragment lifecycle and unintended consequences are occurring when certain configuration changes occur. `setRetainInstance` does not work for fragments on the backstack and `FragmentStatePagerAdapter` has it's own way of managing it's child fragments.
+
+I think it's best to use `FragmentPagerAdapter` to leverage the benefits of `setRetainInstance(true)` without the interference of `FragmentStatePagerAdapter` aggressively destroying fragments. Benefits here is that `setRetainInstance(true)` will work as expected and the `Fragment` not being shown will be stored in memory. So animations should will be smoother. Possible drawbacks are that `Fragment`s created will be stored in memory, not sure if that will cause crashes.
+
+The other option is to keep using `FragmentStatePagerAdapter` and have the `Fragment`s be set to `setRetainInstance(false)`. Benefit here is that we are leveraging the optimizations of `FragmentStatePagerAdapter` but we will be recreating the `Fragment`. For our use cases, it's better to maintain `setRetainInstance(true)` in the `Fragment`. If I were writing this from scratch I would likely prefer a solution which favors `FragmentStatePagerAdapter`.
 
