@@ -34,3 +34,54 @@ https://medium.com/inloop/demystifying-androids-commitallowingstateloss-cb9011a5
 
 https://medium.com/@bherbst/the-many-flavors-of-commit-186608a015b1
 
+### setRetainInstance(true) & FragmentStatePagerAdapter don't play well together
+
+{code:java}
+Fatal Exception: java.lang.RuntimeException: Unable to start activity ComponentInfo{com.scribd.app.reader0/com.scribd.app.ui.MainMenuActivity}: java.lang.IllegalStateException: Could not find active fragment with index -1
+       at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2224)
+       at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2273)
+       at android.app.ActivityThread.handleRelaunchActivity(ActivityThread.java:3764)
+       at android.app.ActivityThread.access$900(ActivityThread.java:138)
+       at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1242)
+       at android.os.Handler.dispatchMessage(Handler.java:102)
+       at android.os.Looper.loop(Looper.java:149)
+       at android.app.ActivityThread.main(ActivityThread.java:5045)
+       at java.lang.reflect.Method.invokeNative(Method.java)
+       at java.lang.reflect.Method.invoke(Method.java:515)
+       at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:794)
+       at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:610)
+       at dalvik.system.NativeStart.main(NativeStart.java)
+Caused by java.lang.IllegalStateException: Could not find active fragment with index -1
+       at android.support.v4.app.FragmentManagerImpl.restoreAllState(Scribd:3026)
+       at android.support.v4.app.Fragment.restoreChildFragmentState(Scribd:1436)
+       at android.support.v4.app.Fragment.onCreate(Scribd:1409)
+       at com.scribd.app.home.HomeFragmentPager.onCreate(Scribd:68)
+       at android.support.v4.app.Fragment.performCreate(Scribd:2329)
+       at android.support.v4.app.FragmentManagerImpl.moveToState(Scribd:1377)
+       at android.support.v4.app.FragmentManagerImpl.moveFragmentToExpectedState(Scribd:1740)
+       at android.support.v4.app.FragmentManagerImpl.moveToState(Scribd:1809)
+       at android.support.v4.app.FragmentManagerImpl.dispatchStateChange(Scribd:3217)
+       at android.support.v4.app.FragmentManagerImpl.dispatchCreate(Scribd:3166)
+       at android.support.v4.app.FragmentController.dispatchCreate(Scribd:181)
+       at android.support.v4.app.FragmentActivity.onCreate(Scribd:312)
+       at android.support.v7.app.AppCompatActivity.onCreate(Scribd:84)
+       at com.scribd.app.ui.ScribdActionBarActivity.onCreate(Scribd:110)
+       at com.scribd.app.ui.GlobalNavActivity.onCreate(Scribd:75)
+       at com.scribd.app.ui.MainMenuActivity.onCreate(Scribd:216)
+       at android.app.Activity.performCreate(Activity.java:5231)
+       at android.app.Instrumentation.callActivityOnCreate(Instrumentation.java:1087)
+       at android.app.ActivityThread.performLaunchActivity(ActivityThread.java:2188)
+       at android.app.ActivityThread.handleLaunchActivity(ActivityThread.java:2273)
+       at android.app.ActivityThread.handleRelaunchActivity(ActivityThread.java:3764)
+       at android.app.ActivityThread.access$900(ActivityThread.java:138)
+       at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1242)
+       at android.os.Handler.dispatchMessage(Handler.java:102)
+       at android.os.Looper.loop(Looper.java:149)
+       at android.app.ActivityThread.main(ActivityThread.java:5045)
+       at java.lang.reflect.Method.invokeNative(Method.java)
+       at java.lang.reflect.Method.invoke(Method.java:515)
+       at com.android.internal.os.ZygoteInit$MethodAndArgsCaller.run(ZygoteInit.java:794)
+       at com.android.internal.os.ZygoteInit.main(ZygoteInit.java:610)
+       at dalvik.system.NativeStart.main(NativeStart.java)
+{code}
+
