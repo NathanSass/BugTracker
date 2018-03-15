@@ -60,9 +60,15 @@ I went to the device's developer options and switched on the setting `Don't Keep
 
 Here are some of my findings:
 
-`setRetainInstance(true)` and `FragmentStatePagerAdapter` each modify the behavior of the fragment lifecycle and unintended consequences are occurring when certain configuration changes occur. `setRetainInstance` does not work for fragments on the backstack and `FragmentStatePagerAdapter` has it's own way of managing it's child fragments.
+`setRetainInstance(true)` and `FragmentStatePagerAdapter` each modify the behavior of the `Fragment` lifecycle and unintended consequences are occurring when certain configuration changes occur. `setRetainInstance` does not work for fragments on the backstack and `FragmentStatePagerAdapter` has it's own way of managing it's child `Fragment`s.
 
 I think it's best to use `FragmentPagerAdapter` to leverage the benefits of `setRetainInstance(true)` without the interference of `FragmentStatePagerAdapter` aggressively destroying fragments. Benefits here is that `setRetainInstance(true)` will work as expected and the `Fragment` not being shown will be stored in memory. So animations should will be smoother. Possible drawbacks are that `Fragment`s created will be stored in memory, not sure if that will cause crashes.
 
-The other option is to keep using `FragmentStatePagerAdapter` and have the `Fragment`s be set to `setRetainInstance(false)`. Benefit here is that we are leveraging the optimizations of `FragmentStatePagerAdapter` but we will be recreating the `Fragment`. For our use cases, it's better to maintain `setRetainInstance(true)` in the `Fragment`. If I were writing this from scratch I would likely prefer a solution which favors `FragmentStatePagerAdapter`.
+The other option is to keep using `FragmentStatePagerAdapter` and have the `Fragment`s be set to `setRetainInstance(false)`. Benefit here is that we are leveraging the optimizations of `FragmentStatePagerAdapter` but we will be recreating the `Fragment`. For our use cases, it's better to maintain `setRetainInstance(true)` in the `Fragment`. If I were writing this from scratch, I would likely prefer a solution which favors `FragmentStatePagerAdapter`.
+
+Useful Reading Materials:
+
+https://stackoverflow.com/a/25012354/1715285
+
+https://stackoverflow.com/a/11318942/1715285
 
