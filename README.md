@@ -72,3 +72,16 @@ https://stackoverflow.com/a/25012354/1715285
 
 https://stackoverflow.com/a/11318942/1715285
 
+### Opening a downloaded audiobook extremely slow sometimes
+
+I was assigned this bug with no stack trace or defined repro steps. Just a UX complaint. I was however, able to get the user's `.ab` (Android Backup) file and load it onto my emulator and actual device and try to reproduce. I was still unable.
+
+I moved onto other work but monitored my own use of the Scribd app. As I was opening an audiobook one morning outside of my apartment I noticed it was taking an extremely long time, despite being downloaded. I felt like it had something to do with switching between my home WIFI and my data connection. I tried a few more times and was able to reproduce it occasionally.
+
+I hypothesized it was related to a poor network connection. Having a poor network connection isn't exactly something I can easily replicate in my dev environment so I turned to Charles Proxy. I set up a proxy for my device and throttled the network down to that of a 56kbps modem. This worked. Opening downloaded audiobooks was extremely slow when on the network. When I switched to airplane mode and had no signal at all, they opened quite quickly. I then hypothesized that there a unnecessary network call being made even if the audiobook was downloaded.
+
+I was quickly able to find the offending code but finding a solution was a bit more challenging. Due to a buisness requirement with the publishers we worked with, we had to make a best effort to open audiobooks with a fresh license.
+
+Without going into too much detail of tradeoffs, etc. I decided to write a service that would prefetch and cache licenses of downloaded audiobooks.
+
+After some additional analysis, it was discovered the endpoint for requesting licenses was very slow. Often taking almost a second to respond - without even adding in any network latency. So even in good network cases, prefetching and caching licenses will improve audiobook opening times by about a second. And in poor network cases, it will eliminate the 15 second or more extremely painful opening times while still supporting the desired buisness requirements. 
