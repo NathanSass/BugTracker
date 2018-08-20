@@ -85,3 +85,15 @@ I was quickly able to find the offending code but finding a solution was a bit m
 Without going into too much detail of tradeoffs, etc. I decided to write a service that would prefetch and cache licenses of downloaded audiobooks.
 
 After some additional analysis, it was discovered the endpoint for requesting licenses was very slow. Often taking almost a second to respond - without even adding in any network latency. So even in good network cases, prefetching and caching licenses will improve audiobook opening times by about a second. And in poor network cases, it will eliminate the 15 second or more extremely painful opening times while still supporting the desired buisness requirements. 
+
+### Impossible Crash happening when starting a Service in Oreo only!
+
+```java
+Fatal Exception: android.app.RemoteServiceException: Context.startForegroundService() did not then call Service.startForeground()
+       at android.app.ActivityThread$H.handleMessage(ActivityThread.java:1768)
+       at android.os.Handler.dispatchMessage(Handler.java:106)
+       at android.os.Looper.loop(Looper.java:164)
+       at android.app.ActivityThread.main(ActivityThread.java:6494)
+       at java.lang.reflect.Method.invoke(Method.java)
+       at 
+```
