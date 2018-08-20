@@ -104,7 +104,7 @@ I deduced the crash occurs because the service is stopped between method calls t
 
 I solved it with some pretty simple boolean that makes it impossible for the service to stopped inbetween calling `Context.startForegroundService()` and `Service.startForeground()`
 
-```javac
+```java
 public class AudiobookNotificationService extends Service {
 
     /**
