@@ -97,3 +97,59 @@ Fatal Exception: android.app.RemoteServiceException: Context.startForegroundServ
        at java.lang.reflect.Method.invoke(Method.java)
        at 
 ```
+
+This crash was occuring in production only, there were no reproduction steps and the crash was growing as more users adopted Oreo. A google search returned no solutions but it did surface this thread with many exasperated developers: https://issuetracker.google.com/issues/76112072 and no good solutions.
+
+I deduced the crash occurs because the service is stopped between method calls to Context.startForegroundService and Service.startForeground. This should technically be impossible because Context.startForegroundService actually calls Service.startForeground internally. This could possibly happen if the service was being stopped from multiple locations and some sort of race condition emerged. I tried for a while to simulate this by jamming the controls which I knew would stop the serivce. I was unable to. I also inspected the code and did not find anywhere were I thought this would be possible to occur.
+
+I solved it with some pretty simple boolean that makes it impossible for the service to stopped inbetween calling `Context.startForegroundService()` and `Service.startForeground()`
+
+```javac
+public class AudiobookNotificationService extends Service {
+
+    /**
+     * This "hack" is for oreo devices https://issuetracker.google.com/issues/76112072
+     * The app will crash if the service is stopped between method calls to {@link Context#startForegroundService(Intent)}
+     * and {@link Service#startForeground(int, Notification)}.
+     */
+    private static boolean hasExecutedStartForeground = false;
+    private static boolean shouldBeStoppedImmediately = false;
+
+    public static void start(final Context context) {
+
+        Intent intent = new Intent(context, AudiobookNotificationService.class);
+
+        if (SharedUtils.hasOreo()) {
+            //Oreo can start the service straight to the foreground.
+            shouldBeStoppedImmediately = false;
+            hasExecutedStartForeground = false;
+            context.startForegroundService(intent);
+        } else {
+            context.startService(intent);
+        }
+    }
+
+    public static void stop(Context context) {
+        if (SharedUtils.hasOreo() && !hasExecutedStartForeground) {
+            shouldBeStoppedImmediately = true;
+            return;
+        }
+        Intent intent = new Intent(context, AudiobookNotificationService.class);
+        context.stopService(intent);
+    }
+
+    @Override
+    public int onStartCommand(Intent intent, int flags, int startId) {
+
+        startForeground(Constants.NOTIFICATION_ID_AUDIOBOOK_CONTROLS, createNotification());
+        if (SharedUtils.hasOreo()) {
+            hasExecutedStartForeground = true;
+        }
+        return (START_NOT_STICKY);
+    }
+    
+    ...
+}
+
+```
+
