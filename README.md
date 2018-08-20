@@ -4,7 +4,7 @@
 
 I had a recycler view with gridded layout manager full of custom views. The padding between items was removed on jellybean. At first I thought it had something to do with the constraint layouts not being defined correctly. I then added some more constraints. Then I thought it had something to do with the nesting of the constraint layouts and the fact that they had a custom dimension. So instead of using `layout_constraintDimensionRatio` I overrode `onMeasure` and set their size dimensions there. This also didn't work. Since this was just a jellybean only bug and we were planning to phase out support over the next few weeks I decided to just programatically add in the padding. It was a little hacky but we were ok with it. There were a couple of issues around this, such as being unable to read padding from the styled typed array so the padding would have to be set statically. Which although not great, was ok because we only had one use of the view in xml in the app. As I debugged this smaller issue, I noticed some strange behavoir of where the `setPadding` method call needed to be placed. My first guess that when I inflated my custom xml, it was blowing out the padding. Suprisingly, this was wrong - I used the debugger and stepped through the code and found out that strangely after `View.setBackgroundResource` was called, there was no more padding. A quick stackoverflow search revealed this to be a known bug. I made a utility method to replace padding for jelly bean instances.
 
-```
+```java
   public static void setBackgroundResourceCompat(@NonNull int backgroundResource, @NonNull View view) {
         // hold reference to the padding
         int leftPadding = view.getPaddingLeft();
@@ -36,7 +36,7 @@ https://medium.com/@bherbst/the-many-flavors-of-commit-186608a015b1
 
 ### setRetainInstance(true) & FragmentStatePagerAdapter don't play well together
 
-```
+```java
 Fatal Exception: java.lang.RuntimeException: Unable to start activity ComponentInfo{com.app.reader0/com.app.ui.MainMenuActivity}: java.lang.IllegalStateException: Could not find active fragment with index -1
       
 Caused by java.lang.IllegalStateException: Could not find active fragment with index -1
